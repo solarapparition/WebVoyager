@@ -20,6 +20,8 @@
 
 ## Introduction
 
+(This is a fork to update the original WebVoyager agent. The original readme is below.)
+
 This repo contains the data and implementation of our paper [WebVoyager](https://arxiv.org/abs/2401.13919). WebVoyager is an innovative Large Multimodal Model (LMM) powered web agent that can complete user instructions end-to-end by interacting with real-world websites. 
 
 - **Multimodal Web Agent**. We implement WebVoyager that integrates textual and visual information to address web tasks end-to-end and introduce a generalist planning approach for navigation.
