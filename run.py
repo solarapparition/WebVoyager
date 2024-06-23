@@ -6,6 +6,7 @@ import re
 import os
 import shutil
 import logging
+import traceback
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -16,6 +17,7 @@ from prompts import SYSTEM_PROMPT, SYSTEM_PROMPT_TEXT_ONLY
 from openai import OpenAI
 from utils import get_web_element_rect, encode_image, extract_information, print_message,\
     get_webarena_accessibility_tree, get_pdf_retrieval_ans_from_assistant, clip_message_and_obs, clip_message_and_obs_text_only
+
 
 
 def setup_logger(folder_path):
@@ -139,6 +141,7 @@ def call_gpt4v_api(args, openai_client, messages):
 
         except Exception as e:
             logging.info(f'Error occurred, retrying. Error type: {type(e).__name__}')
+            logging.info(traceback.format_exc())
 
             if type(e).__name__ == 'RateLimitError':
                 time.sleep(10)
