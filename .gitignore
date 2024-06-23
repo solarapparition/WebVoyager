@@ -1,8 +1,11 @@
-*.log
-downloads
-results/[0-9][0-9][0-9][0-9]*
-test_code.py
+# Directories
 __pycache__
 .vscode
-nohup.out
+downloads
 data
+results/[0-9][0-9][0-9][0-9]*
+
+# Files
+*.log
+test_code.py
+nohup.out
