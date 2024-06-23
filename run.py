@@ -14,6 +14,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 
 from prompts import SYSTEM_PROMPT, SYSTEM_PROMPT_TEXT_ONLY
+from litellm import completion as litellm_completion
 from openai import OpenAI
 from utils import get_web_element_rect, encode_image, extract_information, print_message,\
     get_webarena_accessibility_tree, get_pdf_retrieval_ans_from_assistant, clip_message_and_obs, clip_message_and_obs_text_only
@@ -115,29 +116,28 @@ def format_msg_text_only(it, init_msg, pdf_obs, warn_obs, ac_tree):
             }
         return curr_msg
 
-
-def call_gpt4v_api(args, openai_client, messages):
+def call_model_api(args, messages):
     retry_times = 0
     while True:
         try:
             if not args.text_only:
-                logging.info('Calling gpt4v API...')
-                openai_response = openai_client.chat.completions.create(
+                logging.info('Calling litellm API...')
+                llm_response = litellm_completion(
                     model=args.api_model, messages=messages, max_tokens=1000, seed=args.seed
                 )
             else:
-                logging.info('Calling gpt4 API...')
-                openai_response = openai_client.chat.completions.create(
+                logging.info('Calling litellm API...')
+                llm_response = litellm_completion(
                     model=args.api_model, messages=messages, max_tokens=1000, seed=args.seed, timeout=30
                 )
 
-            prompt_tokens = openai_response.usage.prompt_tokens
-            completion_tokens = openai_response.usage.completion_tokens
+            prompt_tokens = llm_response.usage.prompt_tokens
+            completion_tokens = llm_response.usage.completion_tokens
 
             logging.info(f'Prompt Tokens: {prompt_tokens}; Completion Tokens: {completion_tokens}')
 
             gpt_call_error = False
-            return prompt_tokens, completion_tokens, gpt_call_error, openai_response
+            return prompt_tokens, completion_tokens, gpt_call_error, llm_response
 
         except Exception as e:
             logging.info(f'Error occurred, retrying. Error type: {type(e).__name__}')
@@ -238,7 +238,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--test_file', type=str, default='data/test.json')
     parser.add_argument('--max_iter', type=int, default=5)
-    parser.add_argument("--api_key", default="key", type=str, help="YOUR_OPENAI_API_KEY")
+    parser.add_argument("--api_key", default="key", type=str, help="litellm api key")
+    parser.add_argument("--openai_api_key", default="key", type=str, help="openai api key")
     parser.add_argument("--api_model", default="gpt-4o", type=str, help="api model name")
     parser.add_argument("--output_dir", type=str, default='results')
     parser.add_argument("--seed", type=int, default=None)
@@ -257,7 +258,7 @@ def main():
     args = parser.parse_args()
 
     # OpenAI client
-    client = OpenAI(api_key=args.api_key)
+    client = OpenAI(api_key=args.openai_api_key)
 
     options = driver_config(args)
 
@@ -371,7 +372,7 @@ def main():
                 messages = clip_message_and_obs_text_only(messages, args.max_attached_imgs)
 
             # Call GPT-4v API
-            prompt_tokens, completion_tokens, gpt_call_error, openai_response = call_gpt4v_api(args, client, messages)
+            prompt_tokens, completion_tokens, gpt_call_error, openai_response = call_model_api(args, messages)
 
             if gpt_call_error:
                 break
@@ -499,7 +500,7 @@ def main():
 
         print_message(messages, task_dir)
         driver_task.quit()
-        logging.info(f'Total cost: {accumulate_prompt_token / 1000 * 0.01 + accumulate_completion_token / 1000 * 0.03}')
+        # logging.info(f'Total cost: {accumulate_prompt_token / 1000 * 0.01 + accumulate_completion_token / 1000 * 0.03}')
 
 
 if __name__ == '__main__':
