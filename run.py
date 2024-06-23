@@ -123,12 +123,13 @@ def call_model_api(args, messages):
             if not args.text_only:
                 logging.info('Calling litellm API...')
                 llm_response = litellm_completion(
-                    model=args.api_model, messages=messages, max_tokens=1000, seed=args.seed
+                    model=args.api_model, messages=messages, max_tokens=1000, seed=args.seed, drop_params=True
                 )
+
             else:
                 logging.info('Calling litellm API...')
                 llm_response = litellm_completion(
-                    model=args.api_model, messages=messages, max_tokens=1000, seed=args.seed, timeout=30
+                    model=args.api_model, messages=messages, max_tokens=1000, seed=args.seed, timeout=30, drop_params=True
                 )
 
             prompt_tokens = llm_response.usage.prompt_tokens
