@@ -1,6 +1,6 @@
 *.log
-downloads/*.pdf
-results/2024*
+downloads
+results/[0-9][0-9][0-9][0-9]*
 test_code.py
 __pycache__
 .vscode
